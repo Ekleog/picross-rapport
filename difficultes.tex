@@ -98,3 +98,20 @@ l'\emph{ownership} d'un objet entre plusieurs points, et donc en particulier de
 le sortir de la fonction.
 
 \subsection{Optimisation future}
+
+En exécutant le programme sur des cas de taille assez grande, nous avons pu
+observer qu'un facteur limitant est la quantité de mémoire nécessaire allouée au
+moment du précalcul de toutes les lignes possibles.
+
+Une solution possible pour améliorer cela serait de ne pas stocker toutes les
+lignes telles qu'on les utilisera, mais de simplement stocker le minimum
+d'information pour pouvoir les reconstruire avec peu de calculs~: à la place
+d'une ligne, stocker l'index de départ de chaque bloc de noirs consécutifs (donc
+un \inl!Vec<usize>! contenant autant d'éléments que de blocs, à la place d'un
+\inl!Vec<Cell>! contenant autant d'éléments que de cases dans la ligne ou
+colonne).
+
+Une autre optimisation serait, au fur et à mesure de l'avancée initiale des
+combinaisons-exclusions, de supprimer les «~lignes possibles~» de la liste des
+lignes précalculées. En effet, il n'est plus nécessaire de les conserver, étant
+donné qu'on a déjà prouvé qu'elles ne pouvaient pas être réelles.
