@@ -1,5 +1,7 @@
 \newcommand\thread{\emph{thread}}
 \newcommand\threads{\emph{threads}}
+\newcommand\lifetime{\emph{lifetime}}
+\newcommand\lifetimes{\emph{lifetimes}}
 \newcommand\inl{\mintinline{rust}}
 
 \section{Difficultés rencontrées}
@@ -60,8 +62,39 @@ autre solution aurait par exemple été de séparer les spécifications du
 
 \subsubsection{Lifetimes}
 
+Les \lifetimes ont introduites afin de calculer à quel moment une variable
+commence à vivre et à quel moment elle cesse de vivre. En effet, l'existence de
+\emph{borrows} entraîne naturellement la question précise de quand une variable
+n'est plus allouée. Si on prend l'exemple suivant~:
 
+\inputminted{rust}{LifeTimeWorking.rs}
 
-\subsubsection{Solutions}
+Cet exemple compile car il est assez simple pour que le compilateur arrive à
+déterminer tout seul que la référence retournée a la même durée de vie que le
+paramêtre, mais les lifetimes sont implicites. On pourrait annoter plus
+précisément le code de \inl!held! en la définissant ainsi~:
 
-\subsection{Optimisation}
+\inputminted{rust}{LifeTimeAnnotated.rs}
+
+Cette définition rend explicite le fait que le retour a la même durée de vie que
+le paramètre, notée ici \inl!'a!.
+
+Cependant, il y a des cas particuliers pour lesquels il est impossible de
+définir une lifetime cohérente avec uniquement ces outils. Par exemple, ayant
+repéré que le traitement plus lourd était de simplement générer toutes les
+lignes possibles étant données les contraintes, nous avons d'abord décidé de
+mémoizer les lignes calculées. Cependant, nous avons eu un souci de lifetimes~:
+
+\inputminted[breaklines]{rust}{LifeTimeNotWorking.rs}
+
+Ici, nous souhaitions retourner une référence vers l'élément dans \inl!cache!,
+afin d'éviter une copie inutile. Cependant, il était impossible de le faire,
+étant donné que \inl!cache.borrow_mut()! avait sa \lifetime qui terminait à la
+fin de la \emph{closure}. Une solution, comme nous l'avons découvert après nous
+être rendus compte qu'il était plus intelligent de simplement tout précalculer,
+aurait été d'utiliser un \inl!Rc! à la place d'un \inl!Box!, un pointeur
+intelligent à comptage de référence, qui permet de «~partager~»
+l'\emph{ownership} d'un objet entre plusieurs points, et donc en particulier de
+le sortir de la fonction.
+
+\subsection{Optimisation future}
