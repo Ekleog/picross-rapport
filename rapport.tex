@@ -1,0 +1,43 @@
+\documentclass[11pt]{article}
+\usepackage[francais]{babel} % accents
+\usepackage{graphicx} % \includegraphics
+\usepackage{amsmath}  % maths
+\usepackage{amsfonts} % maths
+\usepackage{amssymb}  % maths
+\usepackage{amsthm}  % maths
+\usepackage{paralist} % inline-enum
+\usepackage{hyperref}
+\usepackage{xcolor}
+\hypersetup{
+    colorlinks,
+    linkcolor={red!80!black},
+    citecolor={blue!50!black},
+    urlcolor={blue!80!black}
+}
+%\usefonttheme[onlymath]{serif}
+\usepackage{fontspec}
+\defaultfontfeatures{Mapping=tex-text}
+%\setsansfont[Ligatures={Common}]{Ubuntu}
+%\setmonofont[Scale=0.8]{Monaco}
+\usepackage{stmaryrd}
+\usepackage{esint}
+\usepackage{geometry}
+\usepackage{wasysym}
+\everymath{\displaystyle}
+
+\title{Rapport de Projet d'Informatique}
+\date{\today}
+\author{%
+    L\'eo Gaspard\\
+    Guillaume Girol
+}
+
+\begin{document}
+
+\maketitle{}
+
+\tableofcontents
+
+\input{difficultes.tex}
+
+\end{document}
