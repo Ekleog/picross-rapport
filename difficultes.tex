@@ -1,3 +1,67 @@
+\newcommand\thread{\emph{thread}}
+\newcommand\threads{\emph{threads}}
+\newcommand\inl{\mintinline{rust}}
+
 \section{Difficultés rencontrées}
 
-Lorem ipsum dolor sit amet
+\subsection{Rust}
+
+Les premières et principales difficultés rencontrées proviennent du langage de
+programmation choisi, Rust. En effet, nous l'avons choisi car, en ayant entendu
+dire énormément de bien, nous nous sommes dit qu'il serait une bonne idée de
+profiter d'un Projet d'Informatique pour apprendre le langage et le mettre en
+pratique sur un cas concret.
+
+En conséquence, nous avons découvert les difficultés que peut proposer rust
+avant d'en découvrir les solutions simples, et avons dû nous battre contre des
+mécanismes originalement conçus pour simplifier la vie.
+
+\subsubsection{Borrow checker}
+
+Le \emph{borrow checker} est une passe du compilateur qui vise à vérifier que
+toute variable n'est accessible en écriture qu'à un endroit à la fois, et
+uniquement si aucun autre endroit n'y a accès en lecture.
+
+Ceci a pour utilité d'empêcher des \emph{race conditions}, en évitant que deux
+\threads puissent écrire en même temps dans le même objet en mémoire, ou bien en
+évitant qu'un \thread tente de lire un objet en cours de modification par un
+autre.
+
+Il sert également à éviter, par exemple qu'alors que l'on est en train d'itérer
+sur un \inl!Vec<T>!.
+
+Cependant, cela peut amener à des problèmes singuliers, dans certains cas. Le
+problème pourrait souvent être résolu en refactorisant le programme, mais les
+contraintes s'imposant sur un tel projet ne sont pas toujours compatibles avec
+un code de propreté maximale.
+
+Par exemple, le programme suivant, version simplifiée d'un cas réel qui nous est
+apparu avec le Picross (les types ont été précisés pour plus de clarté mais ne
+sont pas nécessaires)~:
+
+\inputminted{rust}{BorrowChecker.rs}
+
+Dans ce code, deux parties a priori indépendantes de \inl!v! sont accédées
+simultanément~; mais le développeur sait qu'il est impossible qu'un problème
+survienne.
+
+Cependant, le compilateur rust n'étant pas capable de prouver cela, il renvoie
+le message d'erreur suivant~:
+
+\inputminted[breaklines]{rust}{BorrowChecker.log}
+
+Ce problème est survenu en particulier lorsque nous avons tenté de parcourir en
+même temps les spécifications et les cellules d'un \inl!Picross!, étant donné
+que les deux sont stockés dans le même objet.
+
+Nous avons dans ce cas particulier choisi de \inl!clone()!-er les variables. Une
+autre solution aurait par exemple été de séparer les spécifications du
+\inl!Picross! en lui-même.
+
+\subsubsection{Lifetimes}
+
+
+
+\subsubsection{Solutions}
+
+\subsection{Optimisation}

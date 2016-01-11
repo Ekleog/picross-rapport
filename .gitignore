@@ -1,5 +1,9 @@
 *.aux
-*.log
+rapport.log
 *.out
 *.pdf
 *.toc
+BorrowChecker
+.*.swp
+.*.swo
+_minted-rapport
