@@ -24,6 +24,10 @@
 \usepackage{geometry}
 \usepackage{wasysym}
 \usepackage{minted}
+\usepackage{bbding}
+\usepackage[]{algorithm2e}
+\usepackage{logicpuzzle}
+\nonogramsetup{counterstyle=none,width=4em,scale=0.38,fontsize=scriptsize,extracells=0}
 \everymath{\displaystyle}
 
 \title{Rapport de Projet d'Informatique}
@@ -39,6 +43,13 @@
 
 \tableofcontents
 
+\section{Structure du code}
+
+Le code se présente sous la forme de deux dépôts git : une librairie \texttt{picross} et un exécutable \texttt{picrossbactrack}. Cela permet de collaborer plus efficacement, et on peut imaginer que la librairie soit réutilisable.
+
+Les instructions de compilation sont disponibles dans \texttt{picrossbacktrack/Readme.md}. La compilation avec Cargo nécessite un accès internet pour le téléchargement des dépendances.
+
+\input{demarche.tex}
 \input{difficultes.tex}
 
 \end{document}
