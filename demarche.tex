@@ -1,0 +1,93 @@
+\section{Principe de fonctionnement}
+Nous allons exposer ici comment notre solveur de picross procède.
+\subsection{Lignes possibles}
+
+D'abord, il s'agit de générer les différentes lignes satisfaisant des spécifications données : 
+
+\begin{nonogram}[rows=3,columns=6,extracells=2]
+    \nonogramV{{2,2},{2,2},{2,2}}
+    \nonogramrow{3}{1/2,4/2}
+    \nonogramrow{2}{1/2,5/2}
+    \nonogramrow{1}{2/2,5/2}
+\end{nonogram}
+
+On recherche les lignes de taille $n$ contenant $p$ blocs de taille $s_i$ en position $x_i$.
+
+On remarque que, ces paramètres étant fixés, l'ensemble des lignes possibles est en bijection avec l'ensemble des suites strictement croissantes de $[1, p]$ dans $[1, N+1-\sum s_i +p]$ par :
+\[ \varphi : (s, x) \mapsto \left(x_i -\sum_{j=1}^{i-1} (s_i-1)\right)_i \]
+Nous avons donc écrit un itérateur générant les suites strictement croissantes de $[1, n]$ dans $[1, p]$ puis implémenté $\varphi^{-1}$.
+
+\subsection{Backtrack}
+
+L'étape suivante est d'implémenter un test permettant de déterminer si un picross que l'on remplit en commençant par le haut n'est pas devenu incompatible avec ses spécifications.
+
+On parcourt donc chaque colonne en partant du haut, en comptant les blocs parcourus. Quand on a terminé un bloc, on vérifie que celui-ci est bien listé dans les spécifications de la colonne. Dès que l'on rencontre une case encore inconnue toutefois, on s'arrête. On vérifie juste que le bloc éventuellement inachevé n'est pas trop grand.
+
+Le backtrack est alors simple à mettre en place :
+
+\begin{algorithm}[H]
+ \For{test\_row matching the row specifications}{
+  \eIf{test\_row is compatible with the known cells of the current row of the picross}{
+      save a copy of the current row\;
+      replace the current row of the picross by test\_row\;
+      \eIf{still not reached the bottom of the picross} {
+          backtrack from next row;
+      }{a solution has been found !}
+   }
+ }
+ \caption{Pseudo code du backtracking en partant de la ligne $i$}
+\end{algorithm}
+
+Le fait que l'algorithme de backtracking respecte les cases déjà connues gagnera son importance plus tard.
+
+\subsection{Combinaison, exclusion, \emph{dirty flag}}
+
+Nous avon implémenté la combinaison et l'exlusion au même moment. D'abord, supposons que le picross soit pour le moment completement inconnu.
+
+On cherche à calculer la ligne « dénominateur commun » de toutes les lignes possibles satisfaisant des spécifications données. Par exemple, pour 3,2 dans un ligne de taille 6, on veut obtenir:
+
+
+\begin{center}
+?\SquareSolid??\SquareSolid?
+\end{center}
+
+\begin{algorithm}[H]
+    \KwResult{$gcd$ }
+Let $gcd$ be the first row matching the specifications \;
+ \For{$test\_row$ matching the row specifications}{
+     \For {$i$ in 0..len(test\_row)}{
+         \eIf{$test\_row[i] \neq gcd[i]$}{
+             $gcd[i]\leftarrow$ \texttt{Unknown}\;
+         }
+     }
+ }
+ \caption{Obtenir le « pgcd » des lignes possibles}
+ \end{algorithm}
+
+ Si maintenant le picross est partiellement rempli, on se limitera aux lignes test satisfaisant les contraintes existantes.
+
+Appliquer la combinaison exclusion revient à augmenter chaque ligne du « pgcd » des lignes possibles.
+
+Nous avons donc tenté de résoudre des picross ainsi : 
+\begin{algorithm}[H]
+    Combinaison-Exlusion sur les lignes\;
+    Backtrack\;
+\end{algorithm}
+
+À notre grande surprise, le temps de calcul était plus long. En effet, en y regardant de plus près, le backtrack explore autant de possibilités en passant après la 1\iere étape que sans elle. Il s'agit donc d'appliquer Combinaison/Exlusion de manière croisée sur les lignes puis les colonnes et ce de manière répétée avant de passer au backtrack. Nous avions donc besoin d'un signal d'arrêt : le \emph{dirty flag}.
+
+On rapelle que l'étape de combinaison exclusion consiste à augmenter une ligne des cases connues de son pgcd : si une case est ainsi ajoutée; le \emph{dirty} flag est set à \texttt{true}. Ainsi:
+\begin{algorithm}[H]
+    \While{$dirty$}{
+        Combinaison-Exlusion sur les lignes\;
+        Combinaison-Exlusion sur les colonnes\;
+        $dirty \leftarrow$ \texttt{false}\;
+    }
+    Backtrack\;
+
+
+\subsection{Cache}
+
+Les performances étaient faibles ; à l'aide de Vagrind et kcachegrind, nous nous sommes rendus compte que la majeur partie du temps de calcul était passée à calculer encore et encore les lignes possibles étant données les contraintes. Nous avons donc choisi de précaculer et cacher ces lignes possibles. Cela a drastiquement réduit les exigences du programme en temps de calcul, mais a considérablement augmenté la consommation de mémoire.
+\end{algorithm}
+
